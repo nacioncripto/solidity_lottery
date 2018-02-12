@@ -28,7 +28,8 @@
   "scripts": {
     "test": "mocha",
     "dev": "node ./server.js",
-	  "start": "next start -p $PORT",
+    "start2": "next start -p $PORT",
+    "start": "next ./server.js",
 	  "build": "next build",
     "heroku-postbuild": "npm run build",
     "compile-contract": "node ./ethereum/compile.js",
