@@ -29,7 +29,7 @@
     "test": "mocha",
     "dev": "node ./server.js",
     "start2": "next start -p $PORT",
-    "start": "next ./server.js",
+    "start": "NODE_ENV=production node server.js",
 	  "build": "next build",
     "heroku-postbuild": "npm run build",
     "compile-contract": "node ./ethereum/compile.js",
