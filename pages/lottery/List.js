@@ -7,9 +7,7 @@ import factory from '../../ethereum/factory';
 class LotteryItemsList extends Component {
 
   static async getInitialProps(props) {
-    console.log('Before factory');
     const lotteries = await factory.methods.getLotteries().call();        
-    console.log('Before factory' + lotteries);
     return { lotteries };
   }
 

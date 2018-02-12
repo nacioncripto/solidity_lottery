@@ -52,8 +52,7 @@ class LotteryParticipate extends Component {
                 from: account,
                 value: lotteryData.amountPerPlayer
             });
-            console.log('done ');
-        Router.pushRoute(`/lottery/details/${address}`);
+        Router.pushRoute(`/lottery/details/${lotteryData.address}`);
     } catch (err) {
         console.log(err);
         this.setState({errorMessage: err.message});
