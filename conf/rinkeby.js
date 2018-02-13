@@ -3,8 +3,7 @@
 */
 
 const CONF = {
-    address2: process.env.ADDRESS,
-    address: '0xA847020423447951785f94238c7F395b85dB87E8',
+    address: '0xCFb940e8b66BC4Afa664Dbe4C8579608af74a764',
     infuraKey: process.env.INFURA_KEY,
     addressPhrase: 'Not needed in prod',
     buildFolder: 'Not needed in prod',

@@ -140,8 +140,8 @@ contract Lottery is Pausable {
         _;
     }
   
-    function getSummary() public view returns (uint, uint, uint, address, address, address, address[]) {
-        return (amountPerPlayer, minimumPlayers, winnerAmount, winner, manager, owner, players);
+    function getSummary() public view returns (uint, uint, uint, address, address, address, address[], bool) {
+        return (amountPerPlayer, minimumPlayers, winnerAmount, winner, manager, owner, players, paused);
     }
 
     function enter() public payable whenNotPaused {

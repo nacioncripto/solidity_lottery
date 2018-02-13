@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
-import {Divider, Item, Header, Container, List} from 'semantic-ui-react';
+import {Grid, Divider, Item, Button, Header, Container, List} from 'semantic-ui-react';
 import LotteryItem from '../../components/LotteryItem';
+import {Link} from '../../routes';
 import Layout from '../../components/Layout';
 import factory from '../../ethereum/factory';
 
@@ -32,9 +33,24 @@ class LotteryItemsList extends Component {
       <Layout title="Lotteries List">
         <Header as='h2'>Lotteries List</Header>
         <Divider/>
-        <Item.Group>
-        {lotteries}
-        </Item.Group>
+        <Grid columns='2' divided>
+          <Grid.Row>
+            <Grid.Column width={13}>
+              <Item.Group>
+              {lotteries}
+              </Item.Group>
+            </Grid.Column>
+            <Grid.Column width={3}>
+              <Link route={`/lottery/new`}>
+                  <a>
+                  <Button primary>
+                    Create Lottery
+                  </Button>
+                  </a>
+              </Link>
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
         <Divider/>
         <p style={{textAlign: 'center'}}>{this.props.lotteries.length} Item(s) found.</p>
       </Layout>

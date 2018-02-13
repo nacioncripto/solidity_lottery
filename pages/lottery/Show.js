@@ -7,10 +7,13 @@ import Loader from '../../components/Loader';
 import Lottery from '../../ethereum/lottery';
 import web3 from '../../ethereum/web3';
 import KEYS from '../../conf/keys';
+import LotteryDetails from '../../components/LotteryDetail';
+import LotteryActions from '../../components/LotteryActions';
+import PlayersList from '../../components/PlayersList';
 
 const DEFAULT_EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-class LotteryDetail extends Component {
+class Show extends Component {
   
   state = {
     loading: false,
@@ -29,65 +32,40 @@ class LotteryDetail extends Component {
       winnerAddress: summary[3],
       managerAddress: summary[4],
       ownerAddress: summary[5],
-      players: summary[6]
+      players: summary[6],
+      paused: summary[7]
      };
 
      return {lottery};
   }
 
-  renderItem(iconName, title, value, description) {
-    return (<Item>
-      <Item.Image style={{width: '10%'}}>
-        <Icon name={iconName} size="huge"></Icon>
-      </Item.Image>
-
-      <Item.Content>
-        <Item.Header>{title}</Item.Header>
-        <Item.Meta>
-          <span className='price'>{value}</span>
-        </Item.Meta>
-        <Item.Description>{description}</Item.Description>
-      </Item.Content>
-    </Item>
-    );
-  }
-
-  renderLotteryDetails() {
+  onPauseSubmit = async (event) => {
+    event.preventDefault();
     const {lottery} = this.props;
-    return (
-      <Item.Group>
-          {
-            this.renderItem('address book', 'Manager Address', lottery.managerAddress, 'The address which manages the current lottery.')
-          }
-          {
-            this.renderItem('btc', 'Amount per Player', lottery.amountPerPlayer + ' wei', 'The amount in WEI which a player needs to be part of this lottery.')
-          }
-          {
-            this.renderItem('users', 'Minimum Players', lottery.minimumPlayers + ' players', 'The count of players needed to can pick up a winner.')
-          }
-          {
-            this.renderItem('address card', 'Owner Address', lottery.ownerAddress, '')
-          }
-          {
-            this.renderItem('address card outline', 'Winner Address', lottery.winnerAddress, 'The address which won the current lottery.')
-          }
-          {
-            this.renderItem('btc', 'Winner Amount', (lottery.players.length * lottery.amountPerPlayer) + ' wei', 'The amount in wei for the winner of the current lottery.')
-          }
-        </Item.Group>
-    );
-  }
-
-  renderPlayerAddress() {
-    const {lottery} = this.props;
-    return lottery.players.map((player, index) => {
-        return <List.Item key={player}>
-              <a href={KEYS.explorerUrl + player} target="_blank">
-              {index + 1}- {player}
-              </a>
-        </List.Item>
-    });
-  }
+    
+    const lotteryContract = Lottery(lottery.address);
+    
+    this.setState({loading: true, errorMessage: ''});
+    try {
+        const accounts = await web3.eth.getAccounts();
+        const account = accounts[0];
+        if(account != lottery.ownerAddress) {
+          this.setState({
+            errorMessage: 'Current address is not the owner.',
+            loading: false
+          });
+          return;
+        }
+        await lotteryContract.methods.pause()
+            .send({
+                from: account
+            });
+        Router.pushRoute(`/lottery/details/${lottery.address}`);
+    } catch (err) {
+        this.setState({errorMessage: err.message});
+    }
+    this.setState({loading: false});
+  };
 
   onPickWinnerSubmit = async (event) => {
     event.preventDefault();
@@ -127,26 +105,6 @@ class LotteryDetail extends Component {
 
   onCloseMessage = () => this.setState({errorMessage: ''});
 
-  renderActions(lottery, isInProgress) {
-    return (
-      <Container>
-        <Link route={`/lottery/list`}>
-          <a><Button color="linkedin">Lotteries list</Button></a>
-        </Link>
-        {isInProgress ? 
-          <div>
-            <Link route={`/lottery/participate/${lottery.address}`}>
-              <a><Button secondary loading={this.state.loading}>Participate</Button></a>
-            </Link>
-            <Link route={`/lottery/details/${lottery.address}`}>
-              <a><Button secondary onClick={this.onPickWinnerSubmit} loading={this.state.loading}>Pickup Winner (Only Manager)</Button></a>
-            </Link>
-          </div>
-          :
-        null}   
-      </Container>);
-  };
-
   render() {
     const {lottery} = this.props;
     const finished = (<Header as="p"><Icon name="close" color='red' size="huge"/>Finished</Header>);
@@ -154,24 +112,25 @@ class LotteryDetail extends Component {
     const isInProgress = lottery.winnerAddress == '0x0000000000000000000000000000000000000000';
     return (
       <Layout title="Lottery Details" >
-        <Header as='h3'>Lottery Details
-        </Header>
+        <Header as='h3'>Lottery Details</Header>
         <Divider/>
         <Grid columns='2' divided>
           <Grid.Row>
             <Grid.Column width={10}>
-              {this.renderLotteryDetails()}
+              <LotteryDetails lottery={lottery}/>
             </Grid.Column>
             <Grid.Column width={6}>
               <Header as='h2'>Status</Header>
               {isInProgress ? inProgress : finished}
               <Divider />
-              <Header as='h2'>Actions</Header>
-                {this.renderActions(lottery, isInProgress)}
+              <LotteryActions
+                lottery={lottery}
+                onPickWinnerSubmit={this.onPickWinnerSubmit}
+                onUnpauseSubmit={this.onUnpauseSubmit}
+                onPauseSubmit={this.onPauseSubmit}
+              />
               <Divider />
-              <Header as='h2'>Players ({lottery.players.length} players) </Header>
-              
-              <List items={this.renderPlayerAddress()}/>
+              <PlayersList lottery={lottery}/>
             </Grid.Column>
           </Grid.Row>
         </Grid>
@@ -183,4 +142,4 @@ class LotteryDetail extends Component {
   }
 };
 
-export default LotteryDetail;
+export default Show;
