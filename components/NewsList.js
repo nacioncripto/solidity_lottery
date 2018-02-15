@@ -48,12 +48,7 @@ class NewsList extends Component {
       return null;
     }
 
-    console.log('NewsList Render: ');
-    console.log(news);
-
     const newsContent = news.map((item) => {
-        console.log('Item ');
-        console.log(item);
         return (
           <Transition.Group
             as={Message}

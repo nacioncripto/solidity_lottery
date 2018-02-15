@@ -16,21 +16,15 @@ class LotteryStats extends Component {
 
   componentWillReceiveProps(newProps) {
     const { lotteries, totalAmount, totalPlayers } = newProps.factoryStats;
-    console.log('Props:');
-    console.log(newProps);
     this.setState({
       lotteries: lotteries,
       totalAmount: totalAmount,
       totalPlayers: totalPlayers
     });
-    console.log('Will receive: state');
-    console.log(this.state);
   }
 
   render() {
       const { lotteries, totalAmount, totalPlayers } = this.state;
-      console.log('Render Stats');
-      console.log(this.state);
       const total = totalAmount * totalPlayers;
       const totalLotteries = lotteries.length;
 

@@ -74,15 +74,11 @@ class AppIndex extends Component {
                     signature: event.signature
                 }
             ];
-            console.log('Current State');
-            console.log(this.state);
             const factoryStats = {
                 lotteries: this.state.factoryStats.lotteries.concat(event.address),
                 totalAmount: this.state.factoryStats.totalAmount + parseInt(event.returnValues.amountPerPlayer),
                 totalPlayers: this.state.factoryStats.totalPlayers + parseInt(event.returnValues.minimumPlayers)
             };
-            console.log('New Factory Stats');
-            console.log(factoryStats);
             this.setState({
                 news: items,
                 factoryStats: factoryStats
@@ -94,8 +90,6 @@ class AppIndex extends Component {
         const lottery = Lotteryws(item);
         const enterLotteryEvent = lottery.events.Enter({},function(error, event){})
         .on('data', (event) => {
-            console.log('Enter lottery');
-            console.log(event);
             const items = [
                 {
                     type: event.event,
@@ -121,8 +115,6 @@ class AppIndex extends Component {
         const lottery = Lotteryws(item);
         const enterLotteryEvent = lottery.events.PickWinner({},function(error, event){})
         .on('data', (event) => {
-            console.log('Pickup Winner');
-            console.log(event);
             const items = [
                 {
                     type: event.event,
@@ -155,8 +147,6 @@ class AppIndex extends Component {
     }
 
     render() {
-        console.log('Index render');
-        console.log(this.state.news);
         return (
             <Layout title="Home Lottery" news={this.state.news}>
                 <HomeInfo/>
