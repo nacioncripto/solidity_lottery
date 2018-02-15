@@ -84,6 +84,8 @@ contract Pausable is Ownable {
 
 contract LotteryFactory is Pausable {
     
+    event CreateLottery(uint amountPerPlayer, uint minimumPlayers, address creator);
+    
     struct LotteriesStats {
         uint totalAmount;
         uint totalPlayers;
@@ -98,6 +100,7 @@ contract LotteryFactory is Pausable {
         lotteries.push(lottery);
         lotteriesStats.totalAmount += amountPerPlayer;
         lotteriesStats.totalPlayers += minimumPlayers;
+        CreateLottery(amountPerPlayer, minimumPlayers, msg.sender);
     }
     
     function getLotteries () public view returns (address[]) {
@@ -108,15 +111,20 @@ contract LotteryFactory is Pausable {
         return lotteries.length;
     }
     
-    function getLotteriesStats() public view returns(uint, uint) {
+    function getLotteriesStats() public view returns(uint, uint, address[]) {
         return (
             lotteriesStats.totalAmount,
-            lotteriesStats.totalPlayers
+            lotteriesStats.totalPlayers,
+            lotteries
         );
     }
 }
 
 contract Lottery is Pausable {
+    
+    event Enter(uint amount, address player);
+    event PickWinner(uint winnerAmount, address winner);
+    
     /** Amount per player in wei.*/
     uint public amountPerPlayer;
     uint public minimumPlayers;
@@ -147,6 +155,7 @@ contract Lottery is Pausable {
     function enter() public payable whenNotPaused {
         require(msg.value == amountPerPlayer);
         players.push(msg.sender);
+        Enter(amountPerPlayer, msg.sender);
     }
     
     function random() private view returns (uint) {
@@ -162,6 +171,7 @@ contract Lottery is Pausable {
         winner = players[index];
         winnerAmount = this.balance;
         winner.transfer(this.balance);
+        PickWinner(winnerAmount, winner);
     }
     
     function getBalance() public view returns (uint) {

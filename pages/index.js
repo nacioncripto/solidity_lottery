@@ -1,37 +1,167 @@
 import React, { Component} from 'react';
-import { Button, Container, Divider, Icon, Statistic, Image } from 'semantic-ui-react';
+import {Container, Divider } from 'semantic-ui-react';
 import Layout from '../components/Layout';
 import LotteryStats from '../components/LotteryStats';
 import HomeInfo from '../components/HomeInfo';
 import web3 from '../ethereum/web3';
 import factory from '../ethereum/factory';
+import factoryws from '../ethereum/factoryws';
+import Lotteryws from '../ethereum/lotteryws';
 
 class AppIndex extends Component {
 
+    state = {
+        news: [],
+        factoryStats: {
+            totalAmount: 0,
+            totalPlayers: 0,
+            lotteries: []
+        }
+    };
+
     static async getInitialProps() {
-        const lotteries = await factory.methods.getLotteries().call();        
-        const stats = await factory.methods.getLotteriesStats().call();        
+        const stats = await factory.methods.getLotteriesStats().call();
         return {
-            totalLotteries: lotteries.length,
-            totalAmount: stats[0],
-            totalPlayers: stats[1],
-            total: stats[0] * stats[1]
+            totalAmount: parseInt(stats[0]),
+            totalPlayers: parseInt(stats[1]),
+            lotteries: stats[2]
         };
     }
 
-    render() {
-        const factoryStats = {
-            totalLotteries: this.props.totalLotteries,
-            totalAmount: this.props.totalAmount,
-            totalPlayers: this.props.totalPlayers,
-            total: this.props.total
-        };
+    componentDidMount() {
+        this.updateStats(
+            this.props.lotteries,
+            this.props.totalAmount,
+            this.props.totalPlayers
+        );
+    }
 
+    updateStats(lotteries, totalAmount, totalPlayers) {
+        const factoryStats = {
+            lotteries: lotteries,
+            totalAmount: this.state.factoryStats.totalAmount + totalAmount,
+            totalPlayers: this.state.factoryStats.totalPlayers + totalPlayers
+        };
+        this.setState({
+            factoryStats: factoryStats 
+        });
+    }
+
+    componentWillReceiveProps(newProps) {
+        this.updateStats(
+            newProps.lotteries,
+            newProps.totalAmount,
+            newProps.totalPlayers
+        );
+    }
+    
+    addCreateLotteryEvent() {
+        const createLotteryEvent = factoryws.events.CreateLottery({},function(error, event){})
+        .on('data', (event) => {
+            const items = [
+                {
+                    type: event.event,
+                    name: 'Lottery',
+                    blockNumber: event.blockNumber,
+                    transactionHash: event.transactionHash,
+                    blockHash: event.blockHash,
+                    returnValues: {
+                        amountPerPlayer: event.returnValues.amountPerPlayer,
+                        minimumPlayers: event.returnValues.minimumPlayers,
+                        creator: event.returnValues.creator
+                    },
+                    address: event.address,
+                    signature: event.signature
+                }
+            ];
+            console.log('Current State');
+            console.log(this.state);
+            const factoryStats = {
+                lotteries: this.state.factoryStats.lotteries.concat(event.address),
+                totalAmount: this.state.factoryStats.totalAmount + parseInt(event.returnValues.amountPerPlayer),
+                totalPlayers: this.state.factoryStats.totalPlayers + parseInt(event.returnValues.minimumPlayers)
+            };
+            console.log('New Factory Stats');
+            console.log(factoryStats);
+            this.setState({
+                news: items,
+                factoryStats: factoryStats
+            });
+        });
+    }
+
+    addEnterLotteryEvent(item) {
+        const lottery = Lotteryws(item);
+        const enterLotteryEvent = lottery.events.Enter({},function(error, event){})
+        .on('data', (event) => {
+            console.log('Enter lottery');
+            console.log(event);
+            const items = [
+                {
+                    type: event.event,
+                    name: 'New Player',
+                    blockNumber: event.blockNumber,
+                    transactionHash: event.transactionHash,
+                    blockHash: event.blockHash,
+                    returnValues: {
+                        amount: event.returnValues.amount,
+                        player: event.returnValues.player
+                    },
+                    address: event.address,
+                    signature: event.signature
+                }
+            ];
+            this.setState({
+                news: items
+            });
+        }); 
+    }
+
+    addPickupWinnerEvent(item) {
+        const lottery = Lotteryws(item);
+        const enterLotteryEvent = lottery.events.PickWinner({},function(error, event){})
+        .on('data', (event) => {
+            console.log('Pickup Winner');
+            console.log(event);
+            const items = [
+                {
+                    type: event.event,
+                    name: 'Lottery Winner',
+                    blockNumber: event.blockNumber,
+                    transactionHash: event.transactionHash,
+                    blockHash: event.blockHash,
+                    returnValues: {
+                        winnerAmount: event.returnValues.winnerAmount,
+                        winner: event.returnValues.winner
+                    },
+                    address: event.address,
+                    signature: event.signature
+                }
+            ];
+            this.setState({
+                news: items
+            });
+        });
+    }
+
+    componentWillMount() {
+        this.addCreateLotteryEvent();
+        const {lotteries} = this.props;
+
+        lotteries.map((item) => {
+            this.addEnterLotteryEvent(item);
+            this.addPickupWinnerEvent(item);
+        });
+    }
+
+    render() {
+        console.log('Index render');
+        console.log(this.state.news);
         return (
-            <Layout title="Home Lottery">
+            <Layout title="Home Lottery" news={this.state.news}>
                 <HomeInfo/>
                 <Divider />
-                <LotteryStats factoryStats={factoryStats}/>
+                <LotteryStats factoryStats={this.state.factoryStats}/>
             </Layout>
         );
     }

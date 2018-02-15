@@ -7,9 +7,12 @@ const CONF = {
     infuraKey: '',
     addressPhrase: '',
     buildFolder: 'build',
-    explorerUrl: 'https://rinkeby.etherscan.io/address/',
+    baseExplorerUrl: 'https://rinkeby.etherscan.io/',
     gasLimitToDeploy: '1500000'
 };
+CONF.explorerUrl = CONF.baseExplorerUrl + 'address/',
+CONF.blockExplorer = CONF.baseExplorerUrl + 'block/';
+CONF.txExplorer = CONF.baseExplorerUrl + 'tx/';
 CONF.infuraUrl = `https://rinkeby.infura.io/${CONF.infuraKey}`;
 CONF.contractExplorerUrl = CONF.explorerUrl + CONF.address;
 module.exports = CONF;

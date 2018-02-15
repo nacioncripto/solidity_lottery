@@ -12,12 +12,13 @@ This game is running over the Rinkeby Test Network in order you can play with it
             </p>
             <p>
             The LotteryGame's rules are very simple:
-            <lu>
+            </p>
+            <ul>
                 <li>A player defines an amount per player, and a count of minimum players, and creates a lottery.</li>
                 <li>The rest of players can participate in any lottery they want paying the amount per player defined in it.</li>
                 <li>Once the lottery reaches out the minimum players, the manager (or creator) will be able to pick up a winner randomly.</li>
-            </lu>
-            </p>
+            </ul>
+            
             <p>
             That's all! Let started to play! Click on the button to view all the lotteries:
             </p>

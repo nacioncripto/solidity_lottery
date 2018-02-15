@@ -56,7 +56,7 @@ class LotteryActions extends Component {
       {
         content:<Button secondary onClick={this.props.onPickWinnerSubmit} loading={this.state.loading}>Pickup Winner (Only Manager)</Button>,
         key: 'lotteryPickWinner',
-        visible: true,
+        visible: isInProgress,
         helpText: 'Picks up only one winner of the lottery players list randomly. This action can be taken by the manager ONLY.',
         color: 'blue'
       },
